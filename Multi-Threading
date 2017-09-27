@@ -1,0 +1,70 @@
+/* This program will create a multithreaded program that takes one or more numeric arguments from the command line and displays the 
+prime factors (links to an external site) of each number. Each child thread will be passed a number from the parent thread that 
+should be factored by that thread. Each number should be factored by a different thread. Each child thread will return a sorted 
+integer array of prime factors for that number. The parent thread will wait for each thread to terminate. The parent thread will
+display the original number provided and all factors returned by the child thread to the console.
+
+All threads should be created before any are joined. The reason for using multiple threads in a program like this is so that 
+calculations can be faster if there is more than one processor or core.
+
+The child thread must not display any data. Your only output should be provided by the main thread, and only after waiting 
+for the thread to complete. */
+
+
+
+
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+
+struct thread_info{
+	int thread_num;
+	int number;
+	int array[11];
+	pthread_t thread_id;
+};
+
+void *prime(void *x){
+	struct thread_info *ptr = (struct thread_info *) x;
+	int i, j = 0;
+	int n = ptr->number;
+	int *array;
+	for(i = 2; i * i <= n; i++){
+		while(n % i == 0){
+			ptr->array[j] = i;
+			j++;
+			n = n / i;
+		}
+	}
+	if(n > 2) ptr->array[j] = n;
+	array = ptr->array;
+	return array; 
+}
+
+int main(int argc, char* argv[]){
+	if(argc <= 1){
+		printf("./p3 <number to factor>...\n");
+		return 0;
+	}
+	struct thread_info *tinfo = calloc(argc, sizeof(struct thread_info));
+	int i, j;
+	for(i = 1; i < argc; i++){
+		tinfo[i].thread_num = i;
+		tinfo[i].number = atoi(argv[i]);
+		pthread_create(&tinfo[i].thread_id, NULL, &prime, &tinfo[i]);
+	}
+
+	for(i = 1; i < argc; i++){
+		pthread_join(tinfo[i].thread_id,  NULL);
+	}	
+	
+	for(i = 1; i < argc; i++){
+		printf("%d: ", tinfo[i].number);
+		for(j = 0; j < 11 && tinfo[i].array[j]; j++){
+			printf("%d ", tinfo[i].array[j]);
+		}
+		printf("\n");
+	}	
+	return 0;	
+}
+
