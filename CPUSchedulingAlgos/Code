@@ -1,0 +1,212 @@
+#include <stdio.h>
+
+#define N  100
+void display(int n, int *rspt, int *tat, int *wt){
+	double resp = 0, wait = 0, ta = 0;
+	int i;
+	for(i = 0; i < n; i++){
+		resp += rspt[i];
+		wait += wt[i];
+		ta   += tat[i];
+	}
+	resp /= n;
+	wait /= n;
+	ta /= n;
+	printf("Avg. Resp.: %.2f, Avg. T.A.: %.2f, Avg. Wait: %.2f\n", resp, ta, wait);
+}
+
+// First Come, First Served
+void fcfs (int n, int *at, int *bt) {
+	int rspt[N] = {0}, wt[N] = {0}, tat[N] = {0};
+	int timer = 0;
+	int i = 0;
+
+	for (i = 0; i < n; i++) {
+		if (at[i] > timer) timer = at[i];
+		rspt[i] = timer - at[i];
+		// increase the timer
+		timer += bt[i];
+		tat[i] = timer - at[i];
+		wt[i]  = timer - at[i] - bt[i];
+	}
+	printf("First Come, First Served\n");
+	display(n, rspt, tat, wt);
+}
+
+// Shortest Job First
+void sjf (int n, int *at, int *bt) {
+	int rspt[N] = {0}, wt[N] = {0}, tat[N] = {0};
+	int timer = 0,  i = 0, flag = 0, idx = 0, working = 0;
+	int waiting[N] = {0};
+	int finished[N] = {0};
+
+	while(idx < n){
+		flag = 1;
+		rspt[idx] += timer - at[idx];
+		timer += bt[idx];
+		tat[idx] += timer - at[idx];
+		wt[idx] += timer - at[idx] - bt[idx];
+
+		finished[idx] = 1;
+		waiting[idx] = 0;
+		for (i = 0; i < n; i++){
+			if (finished[i] == 0 && at[i] < timer){
+				waiting[i] = 1;
+				idx = i;
+				flag = 0;
+			}
+		}
+
+		if (flag == 0){
+			for (i = 0; i < n; i++){
+				if (waiting[i] == 1 && bt[i] < bt[idx]){
+					idx = i;
+				}
+			}
+		}
+		else{
+			flag = 1;
+			i = 0;
+			while (finished[i] == 1 && i < n){
+				i++;
+			}
+			if (finished[i] == 0){
+				idx = i;
+				flag = 0;
+				timer = at[i];
+			}
+		}
+	}
+
+	printf("Shortest Job First\n");
+	display(n, rspt, tat, wt);
+	return;
+}
+
+// Shortest Remaining Time First
+void srtf ( int n, int *at, int *bt) {
+	int rspt[N] = {0}, wt[N] = {0}, tat[N] = {0};
+    int timer = 0, last_timer = 0, flag = 0, i = 0, working = 0;
+    int  idx = 0;
+	int waiting[N] = {0};
+	int finished[N] = {0};
+	int rt[N];
+
+	for (i = 0; i < n; i++){
+		rt[i] = bt[i];
+	}
+
+	while (flag == 0){
+		flag = 1;
+		last_timer = timer;
+
+		for (i = n; i > 0; i--){
+			if (finished[i] == 0 && at[i] > timer && at[i] < timer + bt[idx]){
+				timer = at[i];
+				flag = 0;
+			}
+		}
+		if (flag == 1){
+			timer += bt[idx];
+		}
+		rt[idx] -= timer - last_timer;
+		if (rt[idx] == 0){
+			finished[idx] = 1;
+			waiting[idx] = 0;
+			tat[idx] = timer - at[idx];
+		}
+		for (i = 0; i < n; i++){
+			if (waiting[i] == 1 && i != idx){
+				wt[i] = timer - last_timer;
+			}
+		}
+		flag = 1;
+		for (i = 0; i < n; i++){
+			if (finished[i] == 0 && at[i] < timer){
+				waiting[i] = 1;
+				flag = 0;
+			}
+		}
+		for (i = 0; i < n; i++){
+			if (waiting[i] == 1){
+					idx = i;
+			}
+		}
+		if (flag == 1){
+			i = 0;
+			while (finished[i] == 1){
+				i++;
+			}
+			idx = i;
+		}
+		if (rt[idx] == bt[idx]){
+			rspt[idx] = timer - at[idx];
+		}
+	}
+
+	printf("Shortest Remaining Time First\n");
+	display(n, rspt, tat, wt);
+
+    return;
+}
+
+void rr (int n, int *at, int *bt) {
+	int rspt[N] = {0}, wt[N] = {0}, tat[N] = {0};
+    int timer = 0;
+    int i = 0;
+    int q = 5;
+    int rt[N];
+   	int count = 0, remain = n, flag = 0;
+   	for(i = 0; i < n; i++){
+   		// set remaining time to burst time
+   		rt[i] = bt[i];
+   	}
+   	while(remain!=0) { 
+   		// printf("%d ", remain);
+	    timer += q; 
+	    if(rt[count] <= q && rt[count]>0) { 
+	      	rt[count]=0; 
+	      	flag = 1; 
+	      	if(rspt[count] == 0){
+	      		rspt[count] = timer - at[count];
+	      	}
+	    } 
+	    else if(rt[count]>0) { 
+	      	rt[count] -= q; 
+	      	if(rspt[count] == 0){
+	      		rspt[count] = timer - at[count];
+	      	}
+	    } 
+	    if(rt[count]==0) { 
+	      	remain--; 
+	      	
+	      	wt[count] = timer - at[count] - bt[count]; 
+	      	tat[count] = timer - at[count]; 
+	      	flag = 0; 
+	    } 
+	    int x = 0;
+
+	    count++;
+	    count %= n;
+	    	
+	}
+   	printf("Round Robin with Time Quantum of 100\n");
+   	display(n, rspt, tat, wt);
+}
+
+
+
+int main() {
+	int n = 0;
+	int at[N];
+	int bt[N];
+
+	while(fscanf(stdin, "%d %d", &at[n], &bt[n]) == 2) {
+		n++;
+	}
+	rr(n, at, bt);
+	fcfs(n, at, bt);
+	sjf(n, at, bt);
+	srtf(n, at, bt);
+	return 0;
+}
