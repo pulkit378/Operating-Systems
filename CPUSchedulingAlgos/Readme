@@ -1,0 +1,9 @@
+This program will read a list of process start times and durations from stdin. That list will be used 
+four times to run through the following CPU scheduling algorithms: 
+• First Come, First Served 
+• Shortest Job First 
+• Shortest Remaining Time First 
+• Round Robin 
+It will show three statistics: the average process response time, the average process wait time, 
+and the average process turnaround time for each scheduling algorithm. The time quantum for the 
+Round Robin scheduler is 100ms. Your program only needs to work with a maximum of 25 processes.
