@@ -1,0 +1,31 @@
+This is a multithreaded program that shares data between threads. It properly protects data that is shared between threads. 
+It uses mutex locks around critical sections to ensure that the program works correctly and does not experience race conditions.
+
+It uses only use three threads; the main thread, a producer, and a consumer that will accomplish the following tasks:
+
+Main Thread 
+1. Create the producer and consumer threads 
+2. Send each number from the command line to the producer thread via a shared buffer. This buffer only needs to be shared between the main thread and the producer. 
+3. Wait for each thread to complete before terminating the program 
+
+Producer Thread 
+1. Wait for numbers to be added to the buffer shared with the main thread 
+2. Factor each number 
+3. Save numbers to a buffer shared between the producer and consumer threads 
+
+Consumer Thread 
+1. Wait for factors to be added to the buffer shared with the producer thread 
+2. Display the factors  */
+
+This program will use two sets of shared data, in the producer-consumer style. Both sets of data are protected using 
+pthread_mutex_t variables. The only thread producing any output to the console should be the consumer thread. All other threads 
+should perform their actions silently. The program terminates after processing the last number 
+
+
+
+
+
+
+
+
+
